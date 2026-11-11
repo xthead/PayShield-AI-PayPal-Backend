@@ -28,7 +28,6 @@ const PAYPAL_BASE = process.env.PAYPAL_ENV === "live"
 const CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 
-
 async function getAccessToken() {
   if (!CLIENT_ID || !CLIENT_SECRET) {
     throw new Error("PayPal credentials are not configured");
@@ -51,7 +50,6 @@ async function getAccessToken() {
   );
 
   const responseText = await response.text();
-
   let data = {};
 
   try {
@@ -63,7 +61,6 @@ async function getAccessToken() {
   if (!response.ok) {
     console.error("PayPal OAuth diagnostic:", {
       status: response.status,
-      contentType: response.headers.get("content-type"),
       error: data.error,
       error_description: data.error_description,
       responseBody: responseText.slice(0, 1000)
