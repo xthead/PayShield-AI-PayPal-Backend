@@ -4,6 +4,11 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
+const OpenAI = require("openai");
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 const app = express();
 
 app.use(cors({
@@ -53,6 +58,47 @@ async function getAccessToken() {
 app.get("/api/health", (req, res) => {
   res.json({ status: "PayShield AI backend is running" });
 });
+
+// AI Safety Assistant
+app.post("/api/assistant", async (req, res) => {
+  try {
+    const message = req.body.message;
+
+    if (
+      typeof message !== "string" ||
+      message.trim().length === 0
+    ) {
+      return res.status(400).json({
+        error: "Please enter a message to analyze."
+      });
+    }
+
+    if (message.length > 4000) {
+      return res.status(400).json({
+        error: "Message is too long. Maximum 4000 characters."
+      });
+    }
+
+    const response = await openai.responses.create({
+      model: "gpt-5.5",
+      instructions: "You are PayShield AI, a cybersecurity safety assistant. Help users identify phishing, scams, suspicious payment requests, impersonation, and unsafe links. Explain warning signs clearly and give practical safety advice. Never claim a link is definitely safe based only on its text. Never ask users for passwords, payment details, or secret keys.",
+      input: message,
+      max_output_tokens: 500
+    });
+
+    res.json({
+      answer: response.output_text
+    });
+
+  } catch (error) {
+    console.error("AI Assistant error:", error.message);
+
+    res.status(500).json({
+      error: "AI Assistant is temporarily unavailable. Please try again."
+    });
+  }
+});
+
 
 // Create a fixed-value Sandbox order
 app.post("/api/orders", async (req, res) => {
