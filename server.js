@@ -28,6 +28,7 @@ const PAYPAL_BASE = process.env.PAYPAL_ENV === "live"
 const CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 
+
 async function getAccessToken() {
   if (!CLIENT_ID || !CLIENT_SECRET) {
     throw new Error("PayPal credentials are not configured");
@@ -37,27 +38,41 @@ async function getAccessToken() {
     `${CLIENT_ID}:${CLIENT_SECRET}`
   ).toString("base64");
 
-  const response = await fetch(`${PAYPAL_BASE}/v1/oauth2/token`, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${auth}`,
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: "grant_type=client_credentials"
-  });
+  const response = await fetch(
+    `${PAYPAL_BASE}/v1/oauth2/token`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: "grant_type=client_credentials"
+    }
+  );
 
-  const data = await response.json();
-if (!response.ok) {
-  console.error("PayPal OAuth error:", {
-    status: response.status,
-    name: data.name,
-    message: data.message,
-    debug_id: data.debug_id
-  });
+  const responseText = await response.text();
 
-  throw new Error("PayPal authentication failed");
-}
-    return data.access_token;
+  let data = {};
+
+  try {
+    data = JSON.parse(responseText);
+  } catch {
+    data = {};
+  }
+
+  if (!response.ok) {
+    console.error("PayPal OAuth diagnostic:", {
+      status: response.status,
+      contentType: response.headers.get("content-type"),
+      error: data.error,
+      error_description: data.error_description,
+      responseBody: responseText.slice(0, 1000)
+    });
+
+    throw new Error("PayPal authentication failed");
+  }
+
+  return data.access_token;
 }
 app.get("/api/health", (req, res) => {
   res.json({ status: "PayShield AI backend is running" });
