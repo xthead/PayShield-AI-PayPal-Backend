@@ -213,18 +213,3 @@ app.post("/api/orders/:orderID/capture", async (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`PayShield AI backend running on port ${PORT}`);
 });
-
-
-    res.json({
-      status: "COMPLETED",
-      message: "PayPal Sandbox payment successful"
-    });
-  } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ error: "Payment verification failed" });
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`PayShield AI backend running on port ${PORT}`);
-});
