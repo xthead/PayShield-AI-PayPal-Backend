@@ -47,14 +47,18 @@ async function getAccessToken() {
   });
 
   const data = await response.json();
+if (!response.ok) {
+  console.error("PayPal OAuth error:", {
+    status: response.status,
+    name: data.name,
+    message: data.message,
+    debug_id: data.debug_id
+  });
 
-  if (!response.ok) {
-    throw new Error("PayPal authentication failed");
-  }
-
-  return data.access_token;
+  throw new Error("PayPal authentication failed");
 }
-
+    return data.access_token;
+}
 app.get("/api/health", (req, res) => {
   res.json({ status: "PayShield AI backend is running" });
 });
