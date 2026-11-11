@@ -196,6 +196,27 @@ app.post("/api/orders/:orderID/capture", async (req, res) => {
         error: "Payment was not verified as completed"
       });
     }
+    
+ 
+    res.json({
+      status: "COMPLETED",
+      message: "Sandbox payment verified"
+    });
+
+  } catch (error) {
+    console.error("PayPal capture error:", error.message);
+
+    res.status(500).json({
+      error: "Payment capture failed"
+    });
+  }
+});
+
+// Start server
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`PayShield AI backend running on port ${PORT}`);
+});
+
 
     res.json({
       status: "COMPLETED",
